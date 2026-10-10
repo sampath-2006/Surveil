@@ -1,0 +1,33 @@
+Design a System which takes camera feed as input and output whether the camera frame has a dangerous situation like fire or smoke or conflicts oe other dangerous situation 
+
+The Black box should be a ML Pipeline using VLM models which are less than 4B Parameters because ultimately the system to be  deployed on a resource constrainted hardware 
+
+The Main requirements are : 
+
+    i) Whenever a camera is connected at the start it should create a 3D map of the room . The 3d map should be such that we should be able to generate the frames from 3d map if any case of lost video 
+    ii) The System have to do the step (i) every 1minute 
+    iii) when the camera feed is processed for any dangerous systems 
+
+
+idea :
+-> use a vlm and finetune it 
+-> make it as optimised as possible 
+-> create a step in pipeline such that we have those 3d maps saved ..
+
+3D Maps :
+-> These maps should contain all the objects 
+-> These maps should show the coordinates , sizes and depths of every object 
+
+
+Dangerous Situation :
+-> Smoke
+-> Fire
+-> Conflict 
+-> Any other dangerous situation 
+
+constrains:
+-> Code written should be following software devloper standard rules
+-> make it modular such that easy updation for future purposes 
+-> we are ultimately deploying the system on the resource constrainted device , so make it optimised 
+
+

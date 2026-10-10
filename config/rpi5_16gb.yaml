@@ -1,0 +1,47 @@
+hardware:
+  platform: "rpi5_16gb"
+  cpu_cores: 4
+  ram_gb: 16
+  storage: "nvme"            
+  cooling: "active"          
+
+capture:
+  resolution: [640, 480]     
+  fps: 30
+  camera_type: "usb"         
+
+surveillance:
+  ssim_threshold: 0.92       
+  trigger_model: "mobilenetv3_small_int8.onnx"
+  trigger_confidence: 0.6    
+
+danger:
+  model: "moondream2-q4_k_m.gguf"
+  engine: "llama_cpp"
+  threads: 2                 
+  max_response_tokens: 256
+  temperature: 0.1           
+
+mapping:
+  interval_seconds: 300      
+  keyframes_per_cycle: 3     
+  
+  object_detection:
+    model: "florence2_large_int8.onnx"
+    engine: "onnx_runtime"
+    task_prompt: "<OD>"
+  
+  depth_estimation:
+    model: "depthvlm-4b-q4_k_m.gguf"
+    engine: "llama_cpp"
+    threads: 2
+
+thermal:
+  warning_temp_c: 75
+  throttle_temp_c: 80        
+  critical_temp_c: 85        
+
+logging:
+  level: "INFO"
+  output: "data/logs/"
+  max_size_mb: 100

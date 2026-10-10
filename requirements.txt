@@ -1,0 +1,19 @@
+opencv-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+# ONNX Runtime for Florence-2 and MobileNetV3 (CPU only by default on RPi, or use specific wheel for execution providers)
+onnxruntime>=1.16.0
+# Llama.cpp python bindings for Moondream and DepthVLM
+llama-cpp-python>=0.2.56
+# 3D processing and reconstruction
+open3d>=0.18.0
+# Gaussian Splatting (ensure pre-built wheels exist for RPi or build from source)
+gsplat>=0.1.0
+# Configuration management
+omegaconf>=2.3.0
+# Structured logging
+structlog>=24.1.0
+# MQTT client for alerting
+paho-mqtt>=2.0.0
+# Scheduling
+schedule>=1.2.0

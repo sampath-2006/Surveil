@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vlm_danger_system"
+version = "0.1.0"
+description = "VLM-Based Danger Detection & 3D Mapping System tailored for Raspberry Pi 5"
+authors = [
+    { name="Developer" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "opencv-python",
+    "numpy",
+    "Pillow",
+    "onnxruntime",
+    "llama-cpp-python",
+    "open3d",
+    "gsplat",
+    "omegaconf",
+    "structlog",
+    "paho-mqtt",
+    "schedule"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-benchmark",
+    "black",
+    "flake8"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["core", "capture", "detection", "mapping", "alerting", "optimization", "utils"]
