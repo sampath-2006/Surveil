@@ -20,8 +20,10 @@ shared_state = {
     "current_frame": None,
     "keyframe_buffer": [], # Stores recent keyframes for mapping
     "danger_signal": False,
-    "danger_active": False
+    "danger_active": False,
+    "mapping_active": False
 }
+force_mapping_flag = [False]
 state_lock = threading.Lock()
 danger_event = threading.Event()
 
@@ -91,7 +93,7 @@ def danger_analysis_loop(config, thermal_monitor, alert_manager):
             result = vlm_analyzer.analyze(frame_to_analyze)
             
             if result and result.get("severity") in ["HIGH", "CRITICAL"]:
-                logger.critical(f"🚨 CONFIRMED DANGER: {result}")
+                logger.critical(f"[CRITICAL] CONFIRMED DANGER: {result}")
                 alert_manager.dispatch_alert(result)
             else:
                 logger.info(f"Danger dismissed or low severity: {result}")
@@ -107,36 +109,50 @@ def mapping_loop(config, thermal_monitor):
     
     object_detector = VLMObjectDetector(model_path=config.mapping.object_detection.model)
     depth_estimator = VLMDepthEstimator(model_path=config.mapping.depth_estimation.model)
-    reconstructor = MapReconstructor()
+    from src.mapping.reconstructor import map_reconstructor as reconstructor
+    
+    last_run = time.time()
     
     while True:
-        time.sleep(interval)
+        time.sleep(1) # Poll frequently to check for forced mapping
         
+        time_elapsed = time.time() - last_run
+        if time_elapsed < interval and not force_mapping_flag[0]:
+            continue
+            
         with state_lock:
             if shared_state["danger_active"]:
-                logger.info("Danger analysis active, postponing mapping cycle.")
+                if time_elapsed >= interval:
+                    logger.info("Danger analysis active, postponing mapping cycle.")
+                    last_run = time.time() # Reset to avoid spam
                 continue
-            # Grab keyframes for processing
+            shared_state["mapping_active"] = True
             keyframes = list(shared_state["keyframe_buffer"])
+            force_mapping_flag[0] = False
                 
         if thermal_monitor.is_throttling:
             logger.warning("Thermal throttle active, skipping mapping cycle to allow cooling.")
+            with state_lock:
+                shared_state["mapping_active"] = False
+            last_run = time.time()
             continue
             
         if not keyframes:
             logger.info("No keyframes available for mapping. Skipping cycle.")
+            with state_lock:
+                shared_state["mapping_active"] = False
+            last_run = time.time()
             continue
                 
         logger.info(f"Starting 3D mapping cycle with {len(keyframes)} keyframes...")
         
-        # Step 1: Detect objects (Loads Florence-2, then unloads)
         detections = object_detector.detect(keyframes)
-        
-        # Step 2: Estimate metric depth (Loads DepthVLM, then unloads)
         depth_maps = depth_estimator.estimate_depth(keyframes)
-        
-        # Step 3: Reconstruct 3D Map
         reconstructor.rebuild_map(keyframes, detections, depth_maps)
+        
+        last_run = time.time()
+        with state_lock:
+            shared_state["mapping_active"] = False
 
 def main():
     logger.info("Initializing VLM-Based Danger Detection & 3D Mapping System (RPi 5)")
@@ -150,10 +166,17 @@ def main():
     from src.alerting.alert_manager import AlertManager
     alert_manager = AlertManager()
     
+    from src.api import start_api_server
+    from src.core.pruner import start_pruning_scheduler
+    
+    t_pruner = threading.Thread(target=start_pruning_scheduler, daemon=True, name="DataPruner")
+    t_api = threading.Thread(target=start_api_server, args=(shared_state, danger_event, force_mapping_flag), daemon=True, name="API")
     t_surveillance = threading.Thread(target=surveillance_loop, args=(config, thermal_monitor), daemon=True, name="Surveillance")
     t_danger = threading.Thread(target=danger_analysis_loop, args=(config, thermal_monitor, alert_manager), daemon=True, name="DangerAnalysis")
     t_mapping = threading.Thread(target=mapping_loop, args=(config, thermal_monitor), daemon=True, name="Mapping")
     
+    t_pruner.start()
+    t_api.start()
     t_surveillance.start()
     t_danger.start()
     t_mapping.start()

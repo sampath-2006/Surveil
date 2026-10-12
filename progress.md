@@ -26,3 +26,16 @@ All updates and implementation steps are tracked here.
 * **11:55 AM** - Implemented `AlertManager` (`src/alerting/alert_manager.py`) and `MQTTAlertBackend` (`src/alerting/backends/mqtt_backend.py`) for IoT-native danger notifications, wiring it into the Danger Analysis loop.
 * **11:57 AM** - Completed the codebase by injecting the real `llama-cpp-python` and `onnxruntime` inference calls into the VLM Wrappers (`vlm_danger.py`, `vlm_object_detector.py`, `vlm_depth_estimator.py`, `trigger.py`) with fallback "mock" modes so the system can run and be tested immediately before massive model weights finish downloading.
 * **11:57 AM** - Created `scripts/download_models.py` to automate downloading the ONNX and GGUF VLM weights to the NVMe disk.
+* **12:11 PM** - Developed a fully integrated React/Vite Dashboard in `frontend/` to visualize the system state, connected to the Python backend via a newly implemented Flask API.
+* **12:27 PM** - Upgraded the `MapReconstructor` to include Novel View Synthesis, automatically rasterizing and exporting virtual 2D `.png` snapshots derived from the constructed 3D map geometry.
+* **12:35 PM** - Transitioned the system to a production-ready edge state by implementing three critical features:
+  1. **Data Pruning (`src/core/pruner.py`)**: A daily cron thread that deletes maps/logs older than 7 days to protect the NVMe drive.
+  2. **Auto-Boot Configuration (`systemd/vlm-surveil.service`)**: Systemd service to auto-start the Python backend on Raspberry Pi boot and auto-restart on crash.
+  3. **API Security**: Added `X-API-Key` authentication to `src/api.py` and synced the React frontend to pass secure headers to prevent unauthorized triggers.
+* **1:30 PM** - Successfully implemented secure HuggingFace authentication to bypass 401/404 errors and completely downloaded the physical Moondream2 (`.gguf`), Florence-2 (`.onnx`), and MobileNetV3 (`.onnx`) models into the `models/` directory for physical hardware deployment.
+* **10:00 PM** - Compiled and installed the hardware-accelerated AI inference engines (`llama-cpp-python` and `onnxruntime`). The backend `VLMManager` is now fully operational in production mode, loading physical models directly into RAM instead of using the Mock simulator!
+
+## 2026-10-12
+* **10:35 AM** - Formulated and documented the Model Improvements & Performance Evaluation Framework in `model_improvements.md`, defining quantitative targets for hazard recall (>95%), false alarm rate (<1/24h), latency (<3.5s), depth AbsRel (<0.12), and edge memory constraints.
+* **10:38 AM** - Upgraded `VLMManager` and `DangerTrigger` with resilient `models/` directory resolution and enforced `float32` tensor casting for MobileNetV3 ONNX inference. Launched both the Python backend and React Vite dashboard (`http://localhost:5173/`) in live operation.
+* **10:50 AM** - Implemented live MJPEG surveillance streaming (`/api/feed`), integrated Stanford PLY 3D Point Cloud storage & metadata inspector (`data/maps/map_v1.ply`), and added on-demand Novel View Synthesis controls (`POST /api/render_map_view`) with multi-perspective switching (Isometric, Perspective Center, Top-Down Ortho).

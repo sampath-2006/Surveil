@@ -450,9 +450,15 @@ Camera Frame
                               ▼
                      Gaussian Splatting Fit
                               │
+                              ├──► Versioned 3D Map Snapshot (.blob)
+                              │
                               ▼
-                     Versioned Map Snapshot
-                     (stored to NVMe every 3-5 min)
+                     Novel View Synthesis
+                     (Rasterizes 2D image snapshots from the 3D map)
+                              │
+                              ▼
+                     2D Virtual Images (.png)
+                     (Stored to NVMe every 3-5 min alongside 3D map)
 ```
 
 ### 7.2 Data Schema

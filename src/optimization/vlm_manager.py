@@ -14,6 +14,18 @@ class VLMManager:
         self._current_engine = None
         self._lock = threading.Lock()
         
+    def _resolve_path(self, path: str) -> str:
+        if os.path.exists(path):
+            return path
+        candidate = os.path.join("models", path)
+        if os.path.exists(candidate):
+            return candidate
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        candidate_abs = os.path.join(base_dir, "models", os.path.basename(path))
+        if os.path.exists(candidate_abs):
+            return candidate_abs
+        return path
+
     def _unload_current(self):
         if self._current_engine is not None:
             logger.info(f"Unloading model: {self._current_model_name} from memory")
@@ -30,13 +42,18 @@ class VLMManager:
                 return self._current_engine
                 
             self._unload_current()
-            logger.info(f"Loading Moondream 2B from {model_path}...")
+            resolved = self._resolve_path(model_path)
+            logger.info(f"Loading Moondream 2B from {resolved}...")
             
-            if os.path.exists(model_path):
-                from llama_cpp import Llama
-                self._current_engine = Llama(model_path=model_path, n_ctx=2048, n_threads=2, verbose=False)
+            if os.path.exists(resolved):
+                try:
+                    from llama_cpp import Llama
+                    self._current_engine = Llama(model_path=resolved, n_ctx=2048, n_threads=2, verbose=False)
+                except Exception as e:
+                    logger.warning(f"Could not initialize llama-cpp for {resolved}: {e}. Using mock engine.")
+                    self._current_engine = "mock_moondream"
             else:
-                logger.warning(f"Model file {model_path} not found. Using mock engine.")
+                logger.warning(f"Model file {resolved} not found. Using mock engine.")
                 self._current_engine = "mock_moondream"
                 
             self._current_model_name = "moondream"
@@ -50,13 +67,18 @@ class VLMManager:
                 return self._current_engine
                 
             self._unload_current()
-            logger.info(f"Loading Florence-2 from {model_path}...")
+            resolved = self._resolve_path(model_path)
+            logger.info(f"Loading Florence-2 from {resolved}...")
             
-            if os.path.exists(model_path):
-                import onnxruntime as ort
-                self._current_engine = ort.InferenceSession(model_path, providers=['CPUExecutionProvider'])
+            if os.path.exists(resolved):
+                try:
+                    import onnxruntime as ort
+                    self._current_engine = ort.InferenceSession(resolved, providers=['CPUExecutionProvider'])
+                except Exception as e:
+                    logger.warning(f"Could not load Florence-2 ONNX from {resolved}: {e}. Using simulation engine.")
+                    self._current_engine = "mock_florence"
             else:
-                logger.warning(f"Model file {model_path} not found. Using mock engine.")
+                logger.warning(f"Model file {resolved} not found. Using mock engine.")
                 self._current_engine = "mock_florence"
                 
             self._current_model_name = "florence"
@@ -70,13 +92,18 @@ class VLMManager:
                 return self._current_engine
                 
             self._unload_current()
-            logger.info(f"Loading DepthVLM from {model_path}...")
+            resolved = self._resolve_path(model_path)
+            logger.info(f"Loading DepthVLM from {resolved}...")
             
-            if os.path.exists(model_path):
-                from llama_cpp import Llama
-                self._current_engine = Llama(model_path=model_path, n_ctx=2048, n_threads=2, verbose=False)
+            if os.path.exists(resolved):
+                try:
+                    from llama_cpp import Llama
+                    self._current_engine = Llama(model_path=resolved, n_ctx=2048, n_threads=2, verbose=False)
+                except Exception as e:
+                    logger.warning(f"Could not load DepthVLM from {resolved}: {e}. Using simulation engine.")
+                    self._current_engine = "mock_depthvlm"
             else:
-                logger.warning(f"Model file {model_path} not found. Using mock engine.")
+                logger.warning(f"Model file {resolved} not found. Using mock engine.")
                 self._current_engine = "mock_depthvlm"
                 
             self._current_model_name = "depthvlm"

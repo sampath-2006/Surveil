@@ -37,12 +37,22 @@ models/*.onnx
 models/*.bin
 models/*.pt
 models/*.pth
+models/.cache/
 
 # Data and Logs
+logs/
 data/logs/*
 !data/logs/.gitkeep
 data/maps/*
 !data/maps/.gitkeep
+
+# Temporary / Scratch scripts
+scratch.py
+
+# Frontend dependencies
+node_modules/
+frontend/node_modules/
+frontend/dist/
 
 # IDEs
 .idea/
