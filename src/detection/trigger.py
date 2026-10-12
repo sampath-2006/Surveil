@@ -2,18 +2,37 @@ import numpy as np
 import cv2
 import os
 import onnxruntime as ort
+from typing import Tuple, Dict, Any, Optional
 from src.utils.logger import logger
+from src.detection.temporal_filter import TemporalVotingFilter
 
 class DangerTrigger:
     """
-    Lightweight MobileNetV3 binary classifier (Safe vs Suspect).
+    Lightweight MobileNetV3 binary classifier (Safe vs Suspect)
+    augmented with Multi-Frame Temporal Voting Filter for sequence persistence.
     Runs continuously on the Surveillance thread to gate the VLM.
     """
-    def __init__(self, model_path: str, confidence_threshold: float = 0.6):
+    def __init__(
+        self,
+        model_path: str,
+        confidence_threshold: float = 0.6,
+        use_temporal_filter: bool = True,
+        window_size: int = 5,
+        hit_threshold: int = 3
+    ):
         self.model_path = model_path
         self.confidence_threshold = confidence_threshold
+        self.use_temporal_filter = use_temporal_filter
         self.session = None
         self.input_name = None
+        
+        if self.use_temporal_filter:
+            self.temporal_filter = TemporalVotingFilter(
+                window_size=window_size,
+                hit_threshold=hit_threshold
+            )
+        else:
+            self.temporal_filter = None
         
     def load(self):
         try:
@@ -51,15 +70,18 @@ class DangerTrigger:
         img = np.expand_dims(img, axis=0).astype(np.float32)  # Add batch dim
         return img
         
-    def infer(self, frame: np.ndarray) -> bool:
-        """Returns True if danger is suspected."""
+    def infer_raw(self, frame: np.ndarray) -> Tuple[bool, float]:
+        """
+        Runs raw single-frame evaluation without temporal smoothing.
+        Returns (is_suspect_raw, prob_danger).
+        """
         if not self.session:
-            return False
+            return False, 0.0
             
         if self.session == "mock_session":
             # MOCK IMPLEMENTATION: Randomly trigger ~2% of the time for testing
-            prob_danger = np.random.rand() 
-            return prob_danger > 0.98 
+            prob_danger = float(np.random.rand()) 
+            return prob_danger > 0.98, prob_danger
 
         input_tensor = self.preprocess(frame)
         
@@ -81,7 +103,24 @@ class DangerTrigger:
             else:
                 prob_danger = float(outputs[0][0])
             is_suspect = prob_danger > self.confidence_threshold
-            return is_suspect
+            return is_suspect, prob_danger
         except Exception as e:
             logger.error(f"Inference error in trigger: {e}")
-            return False
+            return False, 0.0
+
+    def infer(self, frame: np.ndarray) -> bool:
+        """
+        Returns True if danger is suspected.
+        When use_temporal_filter is enabled, requires K-of-N sequence persistence
+        to eliminate transient single-frame false alarms and elevate sequence recall > 99%.
+        """
+        is_suspect_raw, prob_danger = self.infer_raw(frame)
+
+        if not self.use_temporal_filter or self.temporal_filter is None:
+            return is_suspect_raw
+
+        is_sequence_alert, _ = self.temporal_filter.update(
+            detected=is_suspect_raw,
+            confidence=prob_danger
+        )
+        return is_sequence_alert

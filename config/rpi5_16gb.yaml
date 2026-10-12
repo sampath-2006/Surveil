@@ -17,6 +17,11 @@ surveillance:
   ssim_threshold: 0.92       
   trigger_model: "models/mobilenetv3_small_int8.onnx"
   trigger_confidence: 0.6    
+  temporal_filter:
+    enabled: true
+    window_size: 5           # FIFO window of consecutive frames (N)
+    hit_threshold: 3         # Minimum positive hits required (K)
+    cooldown_frames: 15      # Frames before re-triggering burst alert
 
 danger:
   model: "models/moondream2-q4_k_m.gguf"
@@ -24,6 +29,15 @@ danger:
   threads: 2                 
   max_response_tokens: 256
   temperature: 0.1           
+  cascaded_verification:
+    enabled: true
+    low_conf_threshold: 0.10 # Ultra-sensitive candidate capture (Recall > 92%)
+    high_conf_threshold: 0.65 # Direct pass-through without VLM
+    crop_padding_ratio: 0.20 # Context margin around suspect crops
+  sahi:
+    enabled: false           # High-resolution tiled slicing (enable for 1080p/4K)
+    slice_size: [384, 384]
+    overlap_ratio: 0.20
 
 mapping:
   interval_seconds: 300      

@@ -37,9 +37,13 @@ def surveillance_loop(config, thermal_monitor):
         ssim_threshold=config.surveillance.ssim_threshold
     )
     
+    temporal_cfg = getattr(config.surveillance, "temporal_filter", {})
     trigger = DangerTrigger(
         model_path=config.surveillance.trigger_model,
-        confidence_threshold=config.surveillance.trigger_confidence
+        confidence_threshold=config.surveillance.trigger_confidence,
+        use_temporal_filter=bool(getattr(temporal_cfg, "enabled", True)),
+        window_size=int(getattr(temporal_cfg, "window_size", 5)),
+        hit_threshold=int(getattr(temporal_cfg, "hit_threshold", 3))
     )
     trigger.load()
     

@@ -46,6 +46,8 @@ data/logs/*
 data/maps/*
 !data/maps/.gitkeep
 data/report_assets/page_*.png
+data/cctv_eval_raw/
+*.pt
 
 # Temporary / Scratch scripts
 scratch.py
