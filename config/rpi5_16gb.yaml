@@ -4,6 +4,9 @@ hardware:
   ram_gb: 16
   storage: "nvme"            
   cooling: "active"          
+  acceleration: "cpu_arm_neon" # Options: "cpu_arm_neon", "hailo_8_npu", "coral_tpu"
+  neon_simd: true
+  fp16_dotprod: true          
 
 capture:
   resolution: [640, 480]     

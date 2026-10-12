@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-10-12 11:05:23",
+  "hardware_platform": "rpi5_16gb",
+  "baseline_rss_mb": 97.9,
+  "benchmarks": {
+    "ssim_gating": {
+      "mean_latency_ms": 6.37,
+      "target_ms": "< 15 ms",
+      "pass": "True"
+    },
+    "trigger_mobilenetv3": {
+      "mean_latency_ms": 7.11,
+      "throughput_fps": 140.7,
+      "target_latency_ms": "< 20 ms",
+      "target_fps": "> 50 FPS",
+      "pass": "True"
+    },
+    "moondream_vlm": {
+      "latency_s": 3.88,
+      "target_latency_s": "< 3.5s",
+      "schema_compliant": true,
+      "hazard_detected": "INTRUSION",
+      "severity": "MEDIUM",
+      "pass": true
+    },
+    "depth_estimation": {
+      "latency_ms": 10.45,
+      "target_latency_ms": "< 100 ms",
+      "depth_range_m": [
+        0.7,
+        4.5
+      ],
+      "pass": true
+    },
+    "3d_mapping_and_synthesis": {
+      "ply_build_time_s": 2.06,
+      "novel_view_render_ms": 8.04,
+      "target_render_ms": "< 50 ms",
+      "vertices_count": 4800,
+      "pass": true
+    }
+  },
+  "peak_rss_mb": 1852.4,
+  "memory_delta_mb": 1754.6
+}

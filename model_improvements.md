@@ -145,7 +145,8 @@ To rigorously assess whether the models meet production safety and efficiency st
 - [x] **Milestone 5**: Live 30 FPS surveillance MJPEG video streaming (`/api/feed`).
 - [x] **Milestone 6**: Stanford PLY (`.ply`) 3D point cloud generation and spatial metadata JSON format.
 - [x] **Milestone 7**: On-demand Novel View Synthesis with multi-perspective switching on the web dashboard.
-- [ ] **Milestone 8**: GBNF grammar-constrained decoding for Moondream 2B JSON output.
-- [ ] **Milestone 9**: Depth-Anything-V2 ONNX integration for real metric point cloud generation.
-- [ ] **Milestone 10**: Automated evaluation benchmark suite (`scripts/benchmark_models.py`).
-- [ ] **Milestone 11**: CCTV domain QLoRA fine-tuning and quantized GGUF re-export.
+- [x] **Milestone 8**: GBNF grammar-constrained decoding for Moondream 2B JSON output (`src/detection/vlm_danger.py`).
+- [x] **Milestone 9**: Depth-Anything-V2 metric depth estimation & 3D back-projection (`src/mapping/vlm_depth_estimator.py`).
+- [x] **Milestone 10**: Automated evaluation benchmark suite & executive scorecard (`scripts/benchmark_models.py`).
+- [x] **Milestone 11**: CCTV domain QLoRA fine-tuning pipeline & GGUF export blueprint (`scripts/finetune_lora.py`).
+- [x] **Milestone 12**: ARM NEON SIMD & OpenBLAS hardware acceleration script (`scripts/setup_rpi_acceleration.sh`).

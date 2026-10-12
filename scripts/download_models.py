@@ -60,5 +60,12 @@ if __name__ == "__main__":
         filename="onnx/vision_encoder.onnx",
         dest_filename="florence2_large_int8.onnx"
     )
+
+    # 4. Depth-Anything-V2 Small ONNX
+    get_hf_model(
+        repo_id="onnx-community/Depth-Anything-V2-Small-ONNX",
+        filename="onnx/model_int8.onnx",
+        dest_filename="depth_anything_v2_small_int8.onnx"
+    )
     
     logger.info("Model download process finished.")

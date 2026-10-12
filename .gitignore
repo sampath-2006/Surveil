@@ -45,6 +45,7 @@ data/logs/*
 !data/logs/.gitkeep
 data/maps/*
 !data/maps/.gitkeep
+data/report_assets/page_*.png
 
 # Temporary / Scratch scripts
 scratch.py
